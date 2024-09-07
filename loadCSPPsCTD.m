@@ -3,7 +3,8 @@ tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
 loadTHREDDS=1;
 loadProfile=0;
-cd('C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc');
+folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
+cd(folder);
 
 %% gather THREDDS CSPP data
 if loadTHREDDS
@@ -94,12 +95,11 @@ if loadTHREDDS
 end
 disp(' loaded THREDDS');
 
-%% view
-ce.Properties.VariableNames'
+% ce.Properties.VariableNames' % view variable names
 
 %% add profile variable to THREDDS
 for nsite = 1:4
-    cd('C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB');
+    cd(folder);
     if nsite==1
         load CE01ISSP.mat;
     elseif nsite ==2
@@ -223,6 +223,6 @@ for i=1:1:max(ce.deployment)
 end
 
 %% plot sticks for one deployment
-% make a structure for storing profile
+% make a structure for storing profiles
 
 toc
