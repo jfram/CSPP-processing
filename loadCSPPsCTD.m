@@ -3,6 +3,7 @@ tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
 downloadTHREDDS=0;
 addProfile=0;
+inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 
@@ -98,18 +99,19 @@ disp(' loaded THREDDS');
 % ce.Properties.VariableNames' % view variable names
 
 %% add profile variable to THREDDS
-for nsite = 1:4
+
+if 1==addProfile
     cd(folder);
-    if nsite==1
-        load CE01ISSP.mat;
-    elseif nsite ==2
-        load CE02SHSP.mat;
-    elseif nsite==3
-        load CE06ISSP.mat;
-    else
-        load CE07SHSP.mat;
-    end
-    if 1==addProfile
+    for nsite = 1:4
+        if nsite==1
+            load CE01ISSP.mat;
+        elseif nsite ==2
+            load CE02SHSP.mat;
+        elseif nsite==3
+            load CE06ISSP.mat;
+        else
+            load CE07SHSP.mat;
+        end
         ce.profiler_datetime = datetime(ce.profiler_timestamp,'ConvertFrom','posixtime');
         ce.profile = ce.deployment*NaN;
         % find profile number
@@ -165,75 +167,94 @@ end
 % title('Chris has fixes that CI is reviewing. Come back to this later.');
 % 2024-08-23 flags from ce07 not showing up yet. Updates are in the batch CI is testing.
 close all;
-for i=1:1:max(ce.deployment)
-    figure
-    dex=find(ce.deployment == i);
-    for j=1:max(ce.profile(dex))
-        dex = find(ce.deployment==i & ce.profile==j);
-        depth = ce.depth(dex);
-        profiler_timestamp = ce.profiler_timestamp(dex);
-        profiler_datetime = ce.profiler_datetime(dex);
-
-        sea_water_density = ce.sea_water_density(dex);
-
-        sea_water_electrical_conductivity = ce.sea_water_electrical_conductivity(dex);
-        % sea_water_pressure = ce.sea_water_pressure(dex); % redundant
-        sea_water_practical_salinity = ce.sea_water_practical_salinity(dex);
-        sea_water_temperature = ce.sea_water_temperature(dex);
-        if nsite < 4
-            sea_water_temperature_qartod_results = int16(ce.sea_water_temperature_qartod_results(dex));
-            sea_water_practical_salinity_qartod_results = int16(ce.sea_water_practical_salinity_qartod_results(dex));
-        end
-        %% look at qc. see above.
-        % _qc_executed deprecated
-        % _qc_results deprecated
-        % _qartod_executed. ignore
-        % _qartod_results. look at values above 1.
-        %  No qartod results from CE07. Check back later.
-        % all within 2m of surface? Not 2024-08-23. Check back later.
-
-        %%
-        if nsite<4
-            subplot(221);
-            if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-            subplot(222);
-            if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
-            subplot(223);
-            if j==1; ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
-            subplot(224);
-            if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
+if inspectQC
+    cd(folder);
+    for nsite = 1:4
+        if nsite==1
+            load CE01ISSP.mat;
+        elseif nsite ==2
+            load CE02SHSP.mat;
+        elseif nsite==3
+            load CE06ISSP.mat;
         else
-            subplot(211)
-            if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-            subplot(212);
-            if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
-            clim([25 35]); % cut out greater/less than this
-            % plot narrowers range
+            load CE07SHSP.mat;
         end
 
-        %% confirmed depth vs. sea_water_pressure
-        % plot(depth,sea_water_pressure-depth,'k.'); % --> zero
-        % if j==1; ylabel('pressure'); xlabel('pressure-depth'); axis equal; grid on; hold on; end
+        for i=1:1:max(ce.deployment)
+            figure
+            dex=find(ce.deployment == i);
+            for j=1:max(ce.profile(dex))
+                dex = find(ce.deployment==i & ce.profile==j);
+                depth = ce.depth(dex);
+                profiler_timestamp = ce.profiler_timestamp(dex);
+                profiler_datetime = ce.profiler_datetime(dex);
 
-        %% Note to users CTD bottom skipping in ce06: 1, 5, 10, 16.
-        % ce07 all good. ce01 4-19 not great. ce02: 10
-        % bad depth in ce02 deployment 4. These are times when it didn't
-        % log. It's real.
+                sea_water_density = ce.sea_water_density(dex);
 
-        %% save each deployment to a structure
-        % profs{j}.each_parameter
+                sea_water_electrical_conductivity = ce.sea_water_electrical_conductivity(dex);
+                % sea_water_pressure = ce.sea_water_pressure(dex); % redundant
+                sea_water_practical_salinity = ce.sea_water_practical_salinity(dex);
+                sea_water_temperature = ce.sea_water_temperature(dex);
+                if nsite < 4
+                    sea_water_temperature_qartod_results = int16(ce.sea_water_temperature_qartod_results(dex));
+                    sea_water_practical_salinity_qartod_results = int16(ce.sea_water_practical_salinity_qartod_results(dex));
+                end
+                %% look at qc. see above.
+                % _qc_executed deprecated
+                % _qc_results deprecated
+                % _qartod_executed. ignore
+                % _qartod_results. look at values above 1.
+                %  No qartod results from CE07. Check back later.
+                % all within 2m of surface? Not 2024-08-23. Check back later.
 
+                %%
+                if nsite<4
+                    subplot(221);
+                    if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
+                    %clim([6 18]); % for 07
+                    subplot(222);
+                    if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
+                    %clim([21 35]); % for 07
+                    subplot(223);
+                    if j==1; ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
+                    subplot(224);
+                    if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
+                else
+                    subplot(211)
+                    if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
+                    clim([6 18]);% annotate, mask, or cut out greater/less than this
+                    subplot(212);
+                    if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
+                    scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
+                    clim([21 35]); % annotate, mask, cut out greater/less than this
+                    % plot narrowers range
+                end
+
+                %% confirmed depth vs. sea_water_pressure
+                % plot(depth,sea_water_pressure-depth,'k.'); % --> zero
+                % if j==1; ylabel('pressure'); xlabel('pressure-depth'); axis equal; grid on; hold on; end
+
+                %% Note to users CTD bottom skipping in ce06: 1, 5, 10, 16.
+                % ce07 all good. ce01 4-19 not great. ce02: 10
+                % bad depth in ce02 deployment 4. These are times when it didn't
+                % log. It's real.
+
+                %% save each deployment to a structure
+                % profs{j}.each_parameter
+
+            end
+            % loop again to plot
+            % h=plot_sticks(t,z_c-dz,salt_c,.25);
+            set(gcf,'units','inches','position',[1 1 16 10]);
+        end
     end
-    % loop again to plot
-    % h=plot_sticks(t,z_c-dz,salt_c,.25);
-    set(gcf,'units','inches','position',[1 1 16 10]);
 end
+
 
 %% plot sticks for one deployment
 % make a structure for storing profiles
