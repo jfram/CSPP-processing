@@ -2,7 +2,7 @@ clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
 downloadTHREDDS=0;
-addProfile=0;
+addProfile=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 
@@ -180,7 +180,7 @@ for i=1:1:max(ce.deployment)
         % sea_water_pressure = ce.sea_water_pressure(dex); % redundant
         sea_water_practical_salinity = ce.sea_water_practical_salinity(dex);
         sea_water_temperature = ce.sea_water_temperature(dex);
-        if nsite < 4
+        if site < 4
             sea_water_temperature_qartod_results = int16(ce.sea_water_temperature_qartod_results(dex));
             sea_water_practical_salinity_qartod_results = int16(ce.sea_water_practical_salinity_qartod_results(dex));
         end
@@ -188,34 +188,25 @@ for i=1:1:max(ce.deployment)
         % _qc_executed deprecated
         % _qc_results deprecated
         % _qartod_executed. ignore
-        % _qartod_results. look at values above 1.
+        % _qartod_results. look at values above 1. 
         %  No qartod results from CE07. Check back later.
         % all within 2m of surface? Not 2024-08-23. Check back later.
 
         %%
-        if nsite<4
-            subplot(221);
-            if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-            subplot(222);
-            if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
-            subplot(223);
-            if j==1; ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
-            subplot(224);
-            if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
-        else
-            subplot(211)
-            if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-            subplot(212);
-            if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
-            scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
-            clim([25 35]); % cut out greater/less than this
-            % plot narrowers range
-        end
+        i
+        subplot(221);
+        if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
+        scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
+        subplot(222);
+        if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
+        scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
+        subplot(223);
+        if j==1; ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar; end
+        scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
+        subplot(224);
+        if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
+        scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
+        
 
         %% confirmed depth vs. sea_water_pressure
         % plot(depth,sea_water_pressure-depth,'k.'); % --> zero
