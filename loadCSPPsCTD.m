@@ -117,7 +117,8 @@ if 1==addProfile
         % find profile number
         for i=1:max(ce.deployment)
             dex=find(i==ce.deployment);
-            % only if length dex > 10. There are some data. None in ce06 D00006
+            % only if length dex > 10. There are some data. None in ce06
+            % D00006. 2024-08-23 check back for fix in December
             if length(dex)>10
                 Time=ce.Time(dex);
                 internal_timestamp=ce.internal_timestamp(dex);
@@ -157,7 +158,7 @@ if 1==addProfile
         end
     end
 end
-
+disp('Added profile variable');
 
 %% look at qc flags
 % dex=find(ce.sea_water_temperature_qartod_results>1 | ce.sea_water_practical_salinity_qartod_results>1);
@@ -169,7 +170,7 @@ end
 close all;
 if inspectQC
     cd(folder);
-    for nsite = 1:4
+    for nsite = 3 %1:4
         if nsite==1
             load CE01ISSP.mat;
         elseif nsite ==2
@@ -179,7 +180,11 @@ if inspectQC
         else
             load CE07SHSP.mat;
         end
-
+        dex=find(ce.depth>90);
+        if ~isnan(dex)
+            ce.depth(dex)=NaN; 
+            % nsite 2, deployment 4 has a bad depth near the profile bottom. Should be 69.9;
+        end
         for i=1:1:max(ce.deployment)
             figure
             dex=find(ce.deployment == i);
@@ -204,8 +209,7 @@ if inspectQC
                 % _qc_results deprecated
                 % _qartod_executed. ignore
                 % _qartod_results. look at values above 1.
-                %  No qartod results from CE07. Check back later.
-                % all within 2m of surface? Not 2024-08-23. Check back later.
+                %  all within 2m of surface? Not 2024-08-23. Check back later.
 
                 %%
                 if nsite<4
@@ -223,6 +227,16 @@ if inspectQC
                     subplot(224);
                     if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
                     scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
+                    % Salinity range 21 - 35 is a good mask, not the qartod output.
+                    % mask within 1m, if salinity qartod>1 and salinity <25
+                    % Ignore the temperature qartod. It flags too much.
+                    % No need to mask temperature range. It never fails.
+                    % nsite 3, deployment 5 CTD must have been higher because every profile has a ~10 cm low salinity zone 
+                    % nsite 3, deployment 9 and 14 have a salinity streak that should be masked. 
+                    % nsite 2, deployment 13 has a bad streak. Ignore single bad streaks. Annotations are supposed to be issues that last longer.
+                    % nsite 1, deployment 18 has a few low salinity profiles. Leave. Probably real.
+                    % nsite 1, deployment 4 has many bad streaks. perhaps clog
+                    % At the top of the water colunn, temperatures are fine even when salinities are not fine. I guess, sucking in air
                 else
                     subplot(211)
                     if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
@@ -241,8 +255,7 @@ if inspectQC
 
                 %% Note to users CTD bottom skipping in ce06: 1, 5, 10, 16.
                 % ce07 all good. ce01 4-19 not great. ce02: 10
-                % bad depth in ce02 deployment 4. These are times when it didn't
-                % log. It's real.
+                % These are times when it didn't log. It's real.
 
                 %% save each deployment to a structure
                 % profs{j}.each_parameter
