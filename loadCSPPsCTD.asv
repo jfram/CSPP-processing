@@ -258,7 +258,7 @@ if inspectQC
                 ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; 
                 % clim([6 18]);% annotate, mask, or cut out greater/less than this
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
+                scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
