@@ -6,6 +6,7 @@ addProfile=0;
 inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
+nsitedepths=[25,80,29,87];
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -171,7 +172,7 @@ disp('Added profile variable');
 close all;
 if inspectQC
     cd(folder);
-    for nsite = 4 %1:4
+    for nsite = 1:4
         if nsite==1
             load CE01ISSP.mat;
         elseif nsite ==2
@@ -181,7 +182,6 @@ if inspectQC
         else
             load CE07SHSP.mat;
         end
-        ce.profiler_datetime.TimeZone = 'UTC'; % remove once rerun profile creation code
         dex=find(ce.depth>90);
         if ~isnan(dex)
             ce.depth(dex)=NaN;
@@ -227,45 +227,77 @@ if inspectQC
             % _qartod_results. look at values above 1.
             %  all within 2m of surface? Not 2024-08-23. Check back later.
 
-            %%
-            if nsite<4
-                subplot(221);
-                if j==1; ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; end
+            if nsite == 1
+                subplot(211);
                 scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-                subplot(222);
-                if j==1; ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; end
+                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
+                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_temperature(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
+                dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
+                subplot(212);
+                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
-                subplot(223);
-                if j==1; ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar; end
-                scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
-                subplot(224);
-                if j==1; ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar; end
-                scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
-                % Salinity range 21 - 35 is a good mask, not the qartod output.
-                % Salinity goes down to 19 June 15-18, 2017. Seen in nsite 3
-                % mask within 1m, if salinity qartod>1 and salinity <25
-                % Ignore the temperature qartod. It flags too much.
-                % No need to mask temperature range. It never fails.
-                % nsite 3, deployment 5 CTD must have been higher because every profile has a ~10 cm low salinity zone
-                % nsite 3, deployment 9 and 14 have a salinity streak that should be masked.
-                % nsite 2, deployment 13 has a bad streak. Ignore single bad streaks. Annotations are supposed to be issues that last longer.
-                % nsite 1, deployment 18 has a few low salinity profiles. Leave. Probably real.
-                % nsite 1, deployment 4 has many bad streaks. perhaps clog
-                % At the top of the water colunn, temperatures are fine even when salinities are not fine. I guess, sucking in air
+                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
+                dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
+            elseif nsite == 2
+                subplot(211);
+                scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
+                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
+                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
+                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
+                subplot(212);
+                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
+                scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
+                %dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                %scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
+                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
+            elseif nsite == 3
+                subplot(211);
+                scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
+                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
+                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
+                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
+                subplot(212);
+                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
+                scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
+                %dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
+                %scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
+                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
+                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
+                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
             else
                 subplot(211)
                 scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar; 
+                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
                 % clim([6 18]);% annotate, mask, or cut out greater/less than this
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
                 scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                scatter(bottom.Time(dex),dex*0+85,10,bottom.sea_water_temperature(dex));                
+                scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
                 subplot(212);
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
-                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar; 
+                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
                 % clim([21 35]); % annotate, mask, cut out greater/less than this
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
                 % scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
@@ -273,20 +305,37 @@ if inspectQC
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                scatter(bottom.Time(dex),dex*0+85,10,bottom.sea_water_practical_salinity(dex));
+                scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
             end
-
-            %% confirmed depth vs. sea_water_pressure
-            % plot(depth,sea_water_pressure-depth,'k.'); % --> zero
-            % if j==1; ylabel('pressure'); xlabel('pressure-depth'); axis equal; grid on; hold on; end
-
-            %% Note to users CTD bottom skipping in ce06: 1, 5, 10, 16.
-            % ce07 all good. ce01 4-19 not great. ce02: 10
-            % These are times when it didn't log. It's real.
-
-            % h=plot_sticks(t,z_c-dz,salt_c,.25);
-            set(gcf,'units','inches','position',[1 1 16 10]);
         end
+        % subplot(223);
+        % ylabel('temperature qartod executed'); hold on; set(gca,'ydir','rev'); colorbar;
+        % scatter(profiler_datetime,depth,10,sea_water_temperature_qartod_results,'filled');
+        % subplot(224);
+        % ylabel('salinity qartod results'); hold on; set(gca,'ydir','rev'); colorbar;
+        % scatter(profiler_datetime,depth,10,sea_water_practical_salinity_qartod_results,'filled');
+        % Salinity range 21 - 35 is a good mask, not the qartod output.
+        % Salinity goes down to 19 June 15-18, 2017. Seen in nsite 3
+        % mask within 1m, if salinity qartod>1 and salinity <25
+        % Ignore the temperature qartod. It flags too much. 2023-09-23 Chris has wider fail ranges in the queue
+        % No need to mask temperature range. It never fails.
+        % nsite 3, deployment 5 CTD must have been higher because every profile has a ~10 cm low salinity zone
+        % nsite 3, deployment 9 and 14 have a salinity streak that should be masked.
+        % nsite 2, deployment 13 has a bad streak. Ignore single bad streaks. Annotations are supposed to be issues that last longer.
+        % nsite 1, deployment 18 has a few low salinity profiles. Leave. Probably real.
+        % nsite 1, deployment 4 has many bad streaks. perhaps clog
+        % At the top of the water colunn, temperatures are fine even when salinities are not fine. I guess, sucking in air
+
+        %% confirmed depth vs. sea_water_pressure
+        % plot(depth,sea_water_pressure-depth,'k.'); % --> zero
+        % if j==1; ylabel('pressure'); xlabel('pressure-depth'); axis equal; grid on; hold on; end
+
+        %% Note to users CTD bottom skipping in ce06: 1, 5, 10, 16.
+        % ce07 all good. ce01 4-19 not great. ce02: 10
+        % These are times when it didn't log. It's real.
+
+        % h=plot_sticks(t,z_c-dz,salt_c,.25);
+        set(gcf,'units','inches','position',[1 1 16 10]);
     end
 end
 
