@@ -1,8 +1,8 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=0;
-addProfile=0;
+downloadTHREDDS=1;
+addProfile=1;
 inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
@@ -73,7 +73,7 @@ if downloadTHREDDS
         buoy = load_gc_thredds(mooringSite, buoyNode, buoySensor, mooringMethod, buoyStream, buoyTag);
         riser = load_gc_thredds(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
         if nsite==2
-            load TSVel_NH10_2014_2024;
+            load TSVel_NH10_2014_2024_V2;
             bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
             bottom.Properties.VariableNames{1}='sea_water_temperature';
             bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
@@ -179,7 +179,7 @@ disp('Added profile variable');
 close all;
 if inspectQC
     cd(folder);
-    for nsite = 1:4
+    for nsite =  1:4
         if nsite==1
             load CE01ISSP.mat;
         elseif nsite ==2
