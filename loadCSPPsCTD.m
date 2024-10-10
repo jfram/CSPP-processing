@@ -10,7 +10,7 @@ nsitedepths=[25,80,29,87];
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
-    for nsite=1:4 %4
+    for nsite=1:4
         if nsite==1        % set up required inputs -- CE01ISSP
             site = 'CE01ISSP';
             sensor = '09-CTDPFJ000';
@@ -73,7 +73,10 @@ if downloadTHREDDS
         buoy = load_gc_thredds(mooringSite, buoyNode, buoySensor, mooringMethod, buoyStream, buoyTag);
         riser = load_gc_thredds(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
         if nsite==2
-            bottom = [];
+            load TSVel_NH10_2014_2024;
+            bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
+            bottom.Properties.VariableNames{1}='sea_water_temperature';
+            bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
         else
             bottom = load_gc_thredds(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
         end
@@ -83,10 +86,14 @@ if downloadTHREDDS
         if nsite==1
             save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom');
         elseif nsite ==2
+            buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
+            buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
             save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom');
         elseif nsite==3
             save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom');
         else
+            buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
+            buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
             save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom');
         end
         %filename = 'https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/CE02SHSP-SP001-08-CTDPFJ000-recovered_cspp-ctdpf_j_cspp_instrument_recovered.nc';
@@ -227,12 +234,12 @@ if inspectQC
             % _qartod_results. look at values above 1.
             %  all within 2m of surface? Not 2024-08-23. Check back later.
 
-            if nsite == 1
+            if nsite == 1 || nsite == 3
                 subplot(211);
                 scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                 ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_temperature(dex));
+                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -241,56 +248,17 @@ if inspectQC
                 ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
+                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
                 scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
-            elseif nsite == 2
-                subplot(211);
-                scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
-                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
-                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
-                subplot(212);
-                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
-                scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
-                %dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                %scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
-                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
-            elseif nsite == 3
-                subplot(211);
-                scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
-                ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
-                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
-                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_temperature(dex));
-                subplot(212);
-                ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
-                scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
-                %dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                %scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
-                %dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
-                %scatter(bottom.Time(dex),dex*0+nsitedepths(nsite)-1,10,bottom.sea_water_practical_salinity(dex));
-            else
+            else % 2 or 4
                 subplot(211)
                 scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                 ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
-                % clim([6 18]);% annotate, mask, or cut out greater/less than this
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0,10,buoy.sea_surface_temperature(dex));
+                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_surface_temperature(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -298,10 +266,8 @@ if inspectQC
                 subplot(212);
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
                 ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
-                % clim([21 35]); % annotate, mask, cut out greater/less than this
                 dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                % scatter(buoy.Time(dex),dex*0,10,buoy.sea_water_practical_salinity(dex));
-                %  need to compute this first
+                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_surface_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -339,7 +305,19 @@ if inspectQC
     end
 end
 
-%% plot sticks for one deployment
-% make a structure for storing profiles
+% # calculate the practical salinity of the seawater from the temperature and conductivity measurements
+% ctd['salinity'] = SP_from_C(ctd['conductivity'].values * 10.0, ctd['temperature'].values, ctd['pressure'].values)
+% 
+% # calculate the in-situ density of the seawater from the absolute salinity and conservative temperature
+% sa = SA_from_SP(ctd['salinity'].values, ctd['pressure'].values, lon, lat)  # absolute salinity
+% ct = CT_from_t(sa, ctd['temperature'].values, ctd['pressure'].values)      # conservative temperature
+% ctd['density'] = rho(sa, ct, ctd['pressure'].values)                       # density
+% The above is python code, you'll need to adapt for Matlab, but the Gibbs Sea Water Toolbox functions will be the same:
+% SP_from_C for practical salinity (case may differ)
+% in Matlab
+% gsw_SP_from_C ( C, t, p )
+% C  =  conductivity                                             [ mS/cm ]
+% t  =  in-situ temperature (ITS-90)                             [ deg C ]
+% p  =  sea pressure                                              [ dbar ]
 
 toc
