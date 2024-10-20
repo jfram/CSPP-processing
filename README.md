@@ -10,19 +10,19 @@ Process data from the NSF OOI Endurance Array Coastal Surface Piercing Profilers
 %   make mask for bad data (go through each deployment)
 % download NSIF, MFN, and surface CT data -- done
 %   get decimated CE02 BEP data from Brandy -- done
-% check data against moored CTD data
-%   plot 221: 1: scatter T at the depth for each deployment. 
+% check data against moored CTD data -- 
+%   plot 221: 1: scatter T at the depth for each deployment. -- done 
 %             2: 1:1 T profiler vs. moored (3 dots per profile, so this is per deployment). 
 %             3 & 4: are S
-%   plot 131: 1: T vs. D for each profile in each deployment
-%             2: S vs. D.
+%   plot 131: 1: T vs. D for each profile in each deployment. done
+%             2: S vs. D. -- done
 %             3: T-S profile and moored CTD with depth as color for each profile 
 % CTD lags
 %   ProcessRealTime?
 %   C a few cm down. 12 cm from the top to the center of the C cell.
 %   D instant but below. 56 cm from top to the pressure sensor. 
 %   T instant and exposed. 1 cm from the top to the T sensor.
-%   make variable named depth_sensor for each sensor (depth_temperature, depth_conductivity, depth_pressure) 
+%   make variable named depth_sensor for each sensor (depth_temperature, depth_conductivity, depth_pressure). We want value as a function of depth. 
 % generate additional annotations (make notes per deployment, insert into CI)
 % concatenate deployments into grids: 5cm bin (CTD only), 25cm bin (all sensors), and 2m bin (NH-10 for CTD and ADCP).
 % get data from other CSPP instruments.
