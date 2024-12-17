@@ -1,14 +1,14 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=0;
-addProfile=0;
-inspectQC=1;
-alignCTD=0;
+downloadTHREDDS=1;
+addProfile=1;
+inspectQC=0;
+alignCTD=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=1; %1:4;
+sites=1:4;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -74,29 +74,35 @@ if downloadTHREDDS
         mooringMethod = 'recovered_inst';
         buoy = load_gc_thredds(mooringSite, buoyNode, buoySensor, mooringMethod, buoyStream, buoyTag);
         riser = load_gc_thredds(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
+        buoyannotations = get_annotations(mooringSite, buoyNode, buoySensor);
+        riserannotations = get_annotations(mooringSite, riserNode, riserSensor);
+        CSPPannotations =  get_annotations(site, node, sensor);
+        
         if nsite==2
             load TSVel_NH10_2014_2024_V2;
             bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
             bottom.Properties.VariableNames{1}='sea_water_temperature';
             bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
+            bottomannotations = get_annotations('CE02SHBP', 'LJ01D','06-CTDBPN106');
         else
             bottom = load_gc_thredds(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
+            bottomannotations = get_annotations(mooringSite, bottomNode,bottomSensor);
         end
         ce = load_gc_thredds(site, node, sensor, method, stream, tag);
         % tag = 'deployment0017.*CTDPF.*\.nc$';
-
+        
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
             buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
             buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         else
             buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
             buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         end
         %filename = 'https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/CE02SHSP-SP001-08-CTDPFJ000-recovered_cspp-ctdpf_j_cspp_instrument_recovered.nc';
         %t = nc_reader(filename)
@@ -159,13 +165,13 @@ if 1==addProfile
             end
         end
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         else
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         end
     end
 end
@@ -238,7 +244,7 @@ if inspectQC
             %  all within 2m of surface? Not 2024-08-23. Check back later.
 
             if nsite == 1 || nsite == 3
-                if nsite ~= 3 && i ~= 6
+                if ~(nsite == 3 && i == 6)
                     subplot(221);
                     scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                     ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
@@ -332,13 +338,13 @@ if inspectQC
         % h=plot_sticks(t,z_c-dz,salt_c,.25);
         set(gcf,'units','inches','position',[1 1 16 10]);
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         else
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom');
+            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
         end
     end
 end
