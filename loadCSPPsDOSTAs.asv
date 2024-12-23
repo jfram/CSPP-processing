@@ -1,8 +1,8 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=1;
-addProfile=0;
+downloadTHREDDS=0;
+addProfile=1;
 inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
@@ -131,26 +131,27 @@ if 1==addProfile
                 Time=ce.Time(dex);
                 internal_timestamp=ce.internal_timestamp(dex);
                 profiler_timestamp=ce.profiler_timestamp(dex);
-                % figure('name',int2str(i));
-                % plot(dex(2:end),diff(internal_timestamp),'bo',dex(2:end),diff(profiler_timestamp),'gx','MarkerSize',24); hold on;
-                % plot(dex(2:end),diff(convertTo(Time,'posixtime')),'r.');
                 % Time, internal_timestamp, and profiler_timestamp are the same data
                 figure;
                 tmp=diff(convertTo(Time,'posixtime'));
-                scatter(dex(2:end),tmp,12,ce.sea_water_pressure(dex(2:end)),'filled');
-                hold on;grid on;
+                scatter(dex(2:end),tmp,12,ce.depth(dex(2:end)),'filled'); 
+                hold on;grid on; ylabel('difference in time (seconds)');
                 ind=find(tmp>300);
                 ce.profile(dex(1):dex(ind(1)))=1;
                 for j=2:length(ind)
                     plot([1 1]*dex(ind(j)),[0 300],'k');
                     ce.profile(dex((1+ind(j-1)):ind(j)))=j;
                 end
-                ylim([0 1/8]);
                 ce.profile(dex((ind(j)+1):end))=length(ind)+1;
+                close;
                 figure
-                plot(ce.Time(dex),ce.profile(dex),'.');
+                plot(ce.Time(dex),ce.profile(dex),'k.'); 
+                ylabel('profile number'); grid on; hold on;
                 % looks like diff 5 minutes is a good cut off.
-                close all;
+                % compare to the CTD's labeling of profiles
+                dex=find(i==ctd.ce.deployment);
+                plot(ctd.ce.Time(dex),ctd.ce.profile(dex),'ro');
+                legend({'DOSTA','CTD'});
             else
                 disp(['no data nsite= ',int2str(nsite),' deployment= ',int2str(i)]);
             end
@@ -279,8 +280,6 @@ if inspectQC
                 subplot(212);
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
                 ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
-                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_surface_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -316,26 +315,15 @@ if inspectQC
         % h=plot_sticks(t,z_c-dz,salt_c,.25);
         set(gcf,'units','inches','position',[1 1 16 10]);
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         else
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         end
     end
 end
 
 toc
-% filter: Temperature 0.085 sec, Conductivity 0.085 sec, Pressure 0.25 sec.
-% align
-%   temperature advance = 0.0625 seconds (1/16). C is instant measurements with 1.04 cm 0.04 sec spatial delay, P is instant.
-%   (TAadvance not part of the protocol)
-% thermal mass
-%   celltm Alpha = 0.03
-%   celltm Tau (1/beta)= 7.0
-% skip loop edit because this profiler is different
-% calculate salinity, density, etc
-% bin average 
-

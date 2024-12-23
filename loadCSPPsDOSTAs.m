@@ -7,7 +7,7 @@ inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=1:4;
+sites=1; %1:4;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -97,7 +97,7 @@ if downloadTHREDDS
         end
     end
 end
-disp(' loaded THREDDS');
+disp(' Loaded THREDDS');
 
 % ce.Properties.VariableNames' % view variable names
 
@@ -131,26 +131,29 @@ if 1==addProfile
                 Time=ce.Time(dex);
                 internal_timestamp=ce.internal_timestamp(dex);
                 profiler_timestamp=ce.profiler_timestamp(dex);
-                % figure('name',int2str(i));
-                % plot(dex(2:end),diff(internal_timestamp),'bo',dex(2:end),diff(profiler_timestamp),'gx','MarkerSize',24); hold on;
-                % plot(dex(2:end),diff(convertTo(Time,'posixtime')),'r.');
                 % Time, internal_timestamp, and profiler_timestamp are the same data
                 figure;
                 tmp=diff(convertTo(Time,'posixtime'));
-                scatter(dex(2:end),tmp,12,ce.sea_water_pressure(dex(2:end)),'filled');
-                hold on;grid on;
+                scatter(dex(2:end),tmp,12,ce.depth(dex(2:end)),'filled'); 
+                hold on;grid on; ylabel('difference in time (seconds)');
                 ind=find(tmp>300);
                 ce.profile(dex(1):dex(ind(1)))=1;
                 for j=2:length(ind)
                     plot([1 1]*dex(ind(j)),[0 300],'k');
                     ce.profile(dex((1+ind(j-1)):ind(j)))=j;
                 end
-                ylim([0 1/8]);
                 ce.profile(dex((ind(j)+1):end))=length(ind)+1;
+                close;
                 figure
-                plot(ce.Time(dex),ce.profile(dex),'.');
+                plot(ce.Time(dex),ce.profile(dex),'k.'); 
+                ylabel('profile number'); grid on; hold on;
+                title(int2str(i));
+                set(gcf,'units','inches','Position',[(1+double(i)/25) 1 10 7]);
                 % looks like diff 5 minutes is a good cut off.
-                close all;
+                % compare to the CTD's labeling of profiles
+                dex=find(i==ctd.ce.deployment);
+                plot(ctd.ce.Time(dex),ctd.ce.profile(dex),'ro');
+                legend({'DOSTA','CTD'});
             else
                 disp(['no data nsite= ',int2str(nsite),' deployment= ',int2str(i)]);
             end
@@ -166,11 +169,10 @@ if 1==addProfile
         end
     end
 end
-disp('Added profile variable');
+disp('  Added profile variable');
 
 %% look at qc flags
 
-close all;
 if inspectQC
     cd(folder);
     for nsite = sites

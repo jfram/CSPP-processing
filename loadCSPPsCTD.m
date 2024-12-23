@@ -1,7 +1,7 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=1;
+downloadTHREDDS=0;
 addProfile=1;
 inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
@@ -109,7 +109,7 @@ if downloadTHREDDS
         %t = ncinfo(filename)
     end
 end
-disp(' loaded THREDDS');
+disp(' Loaded THREDDS');
 
 % ce.Properties.VariableNames' % view variable names
 
@@ -174,7 +174,7 @@ if 1==addProfile
         end
     end
 end
-disp('Added profile variable');
+disp('  Added profile variable');
 
 %% look at qc flags
 % dex=find(ce.sea_water_temperature_qartod_results>1 | ce.sea_water_practical_salinity_qartod_results>1);
