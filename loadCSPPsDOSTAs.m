@@ -1,7 +1,7 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=1;
+downloadTHREDDS=0;
 addProfile=1;
 inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
@@ -14,99 +14,87 @@ if downloadTHREDDS
     for nsite=sites
         if nsite==1        % set up required inputs -- CE01ISSP
             site = 'CE01ISSP';
-            sensor = '09-CTDPFJ000';
+            sensor = '02-DOSTAJ000';
             mooringSite = 'CE01ISSM';
-            buoyNode='SBD17';
             riserNode = 'RID16';
             bottomNode = 'MFD37';
-            buoySensor = '06-CTDBPC000';
-            riserSensor = '03-CTDBPC000';
-            bottomSensor = '03-CTDBPC000';
-            buoyStream = 'ctdbp_cdef_instrument_recovered';
-            riserStream = buoyStream; bottomStream = buoyStream;
-            buoyTag = '.*CTDBP.*\.nc$';
+            riserSensor =  '03-DOSTAD000';
+            bottomSensor = '03-DOSTAD000';
+            riserStream =  'dosta_abcdjm_ctdbp_instrument_recovered'; 
+            bottomStream = riserStream;
         elseif nsite == 2 % set up/update required inputs -- CE02SHSP
             site = 'CE02SHSP';
-            sensor = '08-CTDPFJ000';
+            sensor = '01-DOSTAJ000';
             mooringSite = 'CE02SHSM';
-            buoyNode = 'SBD11';
             riserNode= 'RID27';
-            buoySensor = '06-METBKA001';
-            riserSensor = '03-CTDBPC000';
-            buoyStream = 'metbk_ct_instrument';
-            riserStream = 'ctdbp_cdef_instrument_recovered';
-            buoyTag = '.*METBK.*\.nc$';
+            riserSensor = '04-DOSTAD000';
+            riserStream = 'dosta_abcdjm_dcl_instrument_recovered';
             % CE02SHBP-LJ01D-06-CTDBPN106-streamed-ctdbp_no_sample. TOO DENSE. GET FROM BRANDY.
         elseif nsite == 3    % set up/update required inputs -- CE06ISSP
             site = 'CE06ISSP';
-            sensor = '09-CTDPFJ000';
+            sensor = '02-DOSTAJ000';
             mooringSite = 'CE06ISSM';
-            buoyNode = 'SBD17';
             riserNode = 'RID16';
             bottomNode = 'MFD37';
-            buoySensor = '06-CTDBPC000';
-            riserSensor = '03-CTDBPC000';
-            bottomSensor = '03-CTDBPC000';
-            buoyStream = 'ctdbp_cdef_instrument_recovered';
-            riserStream = buoyStream; bottomStream = buoyStream;
-            buoyTag = '.*CTDBP.*\.nc$';
+            riserSensor =  '03-DOSTAD000';
+            bottomSensor = '03-DOSTAD000';
+            riserStream = 'dosta_abcdjm_ctdbp_instrument_recovered'; 
+            bottomStream = riserStream;
         else % set up/update required inputs -- CE07SHSP
             site = 'CE07SHSP';
-            sensor = '08-CTDPFJ000';
+            sensor = '01-DOSTAJ000';
             mooringSite = 'CE07SHSM';
-            buoyNode = 'SBD11';
             riserNode = 'RID27';
             bottomNode = 'MFD37';
-            buoySensor = '06-METBKA001';
-            riserSensor = '03-CTDBPC000';
-            bottomSensor = '03-CTDBPC000';
-            buoyStream = 'metbk_ct_instrument';
-            riserStream = 'ctdbp_cdef_instrument_recovered';
-            bottomStream = riserStream;
-            buoyTag = '.*METBK.*\.nc$';
+            riserSensor = '04-DOSTAD000';
+            bottomSensor = '03-DOSTAD000';
+            riserStream = 'dosta_abcdjm_dcl_instrument_recovered';
+            bottomStream ='dosta_abcdjm_ctdbp_instrument_recovered';
         end
         node = 'SP001';
         method = 'recovered_cspp';
-        stream = 'ctdpf_j_cspp_instrument_recovered';
-        tag = '.*CTDPF.*\.nc$';
-        riserTag = '.*CTDBP.*\.nc$'; bottomTag = riserTag;
-        mooringMethod = 'recovered_inst';
-        buoy = load_gc_thredds(mooringSite, buoyNode, buoySensor, mooringMethod, buoyStream, buoyTag);
-        riser = load_gc_thredds(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
-        buoyannotations = get_annotations(mooringSite, buoyNode, buoySensor);
+        stream = 'dosta_abcdjm_cspp_instrument_recovered';
+        tag = '.*DOSTA.*\.nc$';
+        riserTag = '.*DOSTA.*\.nc$'; bottomTag = riserTag;
+        if nsite == 1 
+            mooringMethod = 'recovered_inst';
+        elseif nsite==2
+            mooringMethod = 'recovered_host';
+        elseif nsite == 3
+            mooringMethod = 'recovered_inst';
+        else
+            mooringMethod = 'recovered_host';
+        end
+        riser = load_gc_thredds_skip(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
         riserannotations = get_annotations(mooringSite, riserNode, riserSensor);
         CSPPannotations =  get_annotations(site, node, sensor);
         
+        if nsite == 4
+            mooringMethod = 'recovered_inst';
+        end
         if nsite==2
-            load TSVel_NH10_2014_2024_V2;
-            bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
-            bottom.Properties.VariableNames{1}='sea_water_temperature';
-            bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
-            bottomannotations = get_annotations('CE02SHBP', 'LJ01D','06-CTDBPN106');
+            % MAKE A BOTTOM DOSTA FILE
+            % load TSVel_NH10_2014_2024_V2;
+            % bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
+            % bottom.Properties.VariableNames{1}='sea_water_temperature';
+            % bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
+            bottom = [];
+            bottomannotations = get_annotations('CE02SHBP', 'LJ01D','06-DOSTAD106');
         else
-            bottom = load_gc_thredds(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
+            bottom = load_gc_thredds_skip(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
             bottomannotations = get_annotations(mooringSite, bottomNode,bottomSensor);
         end
-        ce = load_gc_thredds(site, node, sensor, method, stream, tag);
-        % tag = 'deployment0017.*CTDPF.*\.nc$';
+        ce = load_gc_thredds_skip(site, node, sensor, method, stream, tag);
         
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
-            buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         else
-            buoy.sea_surface_practical_salinity = gsw_SP_from_C ( buoy.sea_surface_conductivity*10, buoy.sea_surface_temperature, 1 );
-            buoy.sea_surface_practical_salinity(buoy.sea_surface_practical_salinity<10)=NaN;
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         end
-        %filename = 'https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/CE02SHSP-SP001-08-CTDPFJ000-recovered_cspp-ctdpf_j_cspp_instrument_recovered.nc';
-        %t = nc_reader(filename)
-        %filesname = 'https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/deployment0001_CE02SHSP-SP001-08-CTDPFJ000-recovered_cspp-ctdpf_j_cspp_instrument_recovered_20150318T193656.769000-20150401T184856.125000.nc';
-        %t = ncinfo(filename)
     end
 end
 disp(' loaded THREDDS');
@@ -119,13 +107,17 @@ if 1==addProfile
     cd(folder);
     for nsite = sites
         if nsite==1
-            load CE01ISSP.mat;
+            load CE01ISSPdosta.mat;
+            ctd=load('CE01ISSP');
         elseif nsite ==2
-            load CE02SHSP.mat;
+            load CE02SHSPdosta.mat;
+            ctd=load('CE02SHSP');
         elseif nsite==3
-            load CE06ISSP.mat;
+            load CE06ISSPdosta.mat;
+            ctd=load('CE06ISSP');
         else
-            load CE07SHSP.mat;
+            load CE07SHSPdosta.mat;
+            ctd=load('CE07SHSP');
         end
         ce.profiler_datetime = datetime(ce.profiler_timestamp,'ConvertFrom','posixtime');
         ce.profiler_datetime.TimeZone = 'UTC';
@@ -164,37 +156,36 @@ if 1==addProfile
             end
         end
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         else
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         end
     end
 end
 disp('Added profile variable');
 
 %% look at qc flags
-% dex=find(ce.sea_water_temperature_qartod_results>1 | ce.sea_water_practical_salinity_qartod_results>1);
-% figure(777);
-% scatter(ce.profiler_datetime(dex),ce.depth(dex),10,ce.sea_water_practical_salinity(dex),'filled');
-% colorbar;
-% title('Chris has fixes that CI is reviewing. Come back to this later.');
-% 2024-08-23 flags from ce07 not showing up yet. Updates are in the batch CI is testing.
+
 close all;
 if inspectQC
     cd(folder);
     for nsite = sites
         if nsite==1
-            load CE01ISSP.mat;
+            load CE01ISSPdosta.mat;
+            ctd=load('CE01ISSP');
         elseif nsite ==2
-            load CE02SHSP.mat;
+            load CE02SHSPdosta.mat;
+            ctd=load('CE02SHSP');
         elseif nsite==3
-            load CE06ISSP.mat;
+            load CE06ISSPdosta.mat;
+            ctd=load('CE06ISSP');
         else
-            load CE07SHSP.mat;
+            load CE07SHSPdosta.mat;
+            ctd=load('CE07SHSP');
         end
         dex=find(ce.depth>90);
         if ~isnan(dex)
@@ -247,8 +238,6 @@ if inspectQC
                     subplot(221);
                     scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                     ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
-                    dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                    scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_water_temperature(dex));
                     dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                     scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                     dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -256,8 +245,6 @@ if inspectQC
                     subplot(222);
                     ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
                     scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled');
-                    dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                    scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_water_practical_salinity(dex));
                     dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                     scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                     dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -265,12 +252,6 @@ if inspectQC
 
                     % 1:1 plots
                     for p=1:max(profile)
-                        dex=find(1<depth & depth<2 & p==profile);
-                        csppT.buoy(nsite,i,p)=mean(sea_water_temperature(dex));
-                        ind=find(p==profile);
-                        dex=find((min(profiler_datetime(ind))-15/60/24)<buoy.Time & buoy.Time<(max(profiler_datetime(ind))+15/60/24));
-                        moorT.buoy(nsite,i,p)=mean(buoy.sea_water_temperature(dex));
-
                         dex=find(6<depth & depth<8 & p==profile);
                         csppT.riser(nsite,i,p)=mean(sea_water_temperature(dex));
                         ind=find(p==profile);
@@ -284,15 +265,13 @@ if inspectQC
                         moorT.bottom(nsite,i,p)=mean(bottom.sea_water_temperature(dex));
                     end
                     subplot(223)
-                    plot(squeeze(csppT.buoy(nsite,i,:)),squeeze(moorT.buoy(nsite,i,:)),'.',squeeze(csppT.riser(nsite,i,:)),squeeze(moorT.riser(nsite,i,:)),'.',squeeze(csppT.bottom(nsite,i,:)),squeeze(moorT.bottom(nsite,i,:)),'.');
+                    plot(squeeze(csppT.riser(nsite,i,:)),squeeze(moorT.riser(nsite,i,:)),'.',squeeze(csppT.bottom(nsite,i,:)),squeeze(moorT.bottom(nsite,i,:)),'.');
                     grid on; axis equal;
                 end
             else % 2 or 4
                 subplot(211)
                 scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                 ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
-                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_surface_temperature(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_temperature(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -300,8 +279,6 @@ if inspectQC
                 subplot(212);
                 scatter(profiler_datetime,depth,10,sea_water_practical_salinity,'filled')
                 ylabel('salinity'); hold on; set(gca,'ydir','rev'); colorbar;
-                dex=find(min(profiler_datetime)<buoy.Time & buoy.Time<max(profiler_datetime));
-                scatter(buoy.Time(dex),dex*0+1,10,buoy.sea_surface_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
                 scatter(riser.Time(dex),dex*0+7,10,riser.sea_water_practical_salinity(dex));
                 dex=find(min(profiler_datetime)<bottom.Time & bottom.Time<max(profiler_datetime));
@@ -337,26 +314,15 @@ if inspectQC
         % h=plot_sticks(t,z_c-dz,salt_c,.25);
         set(gcf,'units','inches','position',[1 1 16 10]);
         if nsite==1
-            save('CE01ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
-            save('CE02SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite==3
-            save('CE06ISSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         else
-            save('CE07SHSP.mat','-v7.3','ce','buoy','riser','bottom','buoyannotations','riserannotations','bottomannotations','CSPPannotations');
+            save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         end
     end
 end
 
 toc
-% filter: Temperature 0.085 sec, Conductivity 0.085 sec, Pressure 0.25 sec.
-% align
-%   temperature advance = 0.0625 seconds (1/16). C is instant measurements with 1.04 cm 0.04 sec spatial delay, P is instant.
-%   (TAadvance not part of the protocol)
-% thermal mass
-%   celltm Alpha = 0.03
-%   celltm Tau (1/beta)= 7.0
-% skip loop edit because this profiler is different
-% calculate salinity, density, etc
-% bin average 
-
