@@ -7,7 +7,7 @@ inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=1; %1:4;
+sites=1:4;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -20,7 +20,7 @@ if downloadTHREDDS
             bottomNode = 'MFD37';
             riserSensor =  '03-DOSTAD000';
             bottomSensor = '03-DOSTAD000';
-            riserStream =  'dosta_abcdjm_ctdbp_instrument_recovered'; 
+            riserStream =  'dosta_abcdjm_ctdbp_instrument_recovered';
             bottomStream = riserStream;
         elseif nsite == 2 % set up/update required inputs -- CE02SHSP
             site = 'CE02SHSP';
@@ -38,7 +38,7 @@ if downloadTHREDDS
             bottomNode = 'MFD37';
             riserSensor =  '03-DOSTAD000';
             bottomSensor = '03-DOSTAD000';
-            riserStream = 'dosta_abcdjm_ctdbp_instrument_recovered'; 
+            riserStream = 'dosta_abcdjm_ctdbp_instrument_recovered';
             bottomStream = riserStream;
         else % set up/update required inputs -- CE07SHSP
             site = 'CE07SHSP';
@@ -56,7 +56,7 @@ if downloadTHREDDS
         stream = 'dosta_abcdjm_cspp_instrument_recovered';
         tag = '.*DOSTA.*\.nc$';
         riserTag = '.*DOSTA.*\.nc$'; bottomTag = riserTag;
-        if nsite == 1 
+        if nsite == 1
             mooringMethod = 'recovered_inst';
         elseif nsite==2
             mooringMethod = 'recovered_host';
@@ -68,7 +68,7 @@ if downloadTHREDDS
         riser = load_gc_thredds_skip(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
         riserannotations = get_annotations(mooringSite, riserNode, riserSensor);
         CSPPannotations =  get_annotations(site, node, sensor);
-        
+
         if nsite == 4
             mooringMethod = 'recovered_inst';
         end
@@ -85,7 +85,7 @@ if downloadTHREDDS
             bottomannotations = get_annotations(mooringSite, bottomNode,bottomSensor);
         end
         ce = load_gc_thredds_skip(site, node, sensor, method, stream, tag);
-        
+
         if nsite==1
             save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
         elseif nsite ==2
@@ -123,39 +123,34 @@ if 1==addProfile
         ce.profiler_datetime.TimeZone = 'UTC';
         ce.profile = ce.deployment*NaN;
         % find profile number
-        for i=1:max(ce.deployment)
-            dex=find(i==ce.deployment);
-            % only if length dex > 10. There are some data. None in ce06
-            % D00006. 2024-08-23 check back for fix in December
-            if length(dex)>10
-                Time=ce.Time(dex);
-                internal_timestamp=ce.internal_timestamp(dex);
-                profiler_timestamp=ce.profiler_timestamp(dex);
+        for i=1:max(ctd.ce.deployment)
+            dex=find(i==ctd.ce.deployment);
+            if ~isempty(dex)
+                ctd_Time=ctd.ce.Time(dex);
+                ctd_profiler_timestamp=ctd.ce.profiler_timestamp(dex);
+                ctd_profile = ctd.ce.profile(dex);
                 % Time, internal_timestamp, and profiler_timestamp are the same data
-                figure;
-                tmp=diff(convertTo(Time,'posixtime'));
-                scatter(dex(2:end),tmp,12,ce.depth(dex(2:end)),'filled'); 
-                hold on;grid on; ylabel('difference in time (seconds)');
-                ind=find(tmp>300);
-                ce.profile(dex(1):dex(ind(1)))=1;
-                for j=2:length(ind)
-                    plot([1 1]*dex(ind(j)),[0 300],'k');
-                    ce.profile(dex((1+ind(j-1)):ind(j)))=j;
+                dex = find(i==ce.deployment);
+                Time=ctd.ce.Time(dex);
+                profiler_timestamp=ce.profiler_timestamp(dex);
+                if ~isempty(dex)                    
+                    for j=1:max(ctd_profile)
+                        ind = find(j == ctd_profile);
+                        index = find(min(ctd_profiler_timestamp(ind)) <= profiler_timestamp & profiler_timestamp <= max(ctd_profiler_timestamp(ind)));
+                        ce.profile(dex(index))=j;
+                    end
+                    figure(double(i));
+                    plot(ce.Time(dex),ce.profile(dex),'k.');
+                    ylabel('profile number'); grid on; hold on;
+                    title(int2str(i));
+                    set(gcf,'units','inches','Position',[(1+double(i)/25) 1 12 8]);
+                    plot(ctd_Time,ctd_profile,'ro');
+                    legend({'DOSTA','CTD'},'Location','east');
+                else
+                    disp(['no DOSTA data nsite= ',int2str(nsite),' deployment= ',int2str(i)]);
                 end
-                ce.profile(dex((ind(j)+1):end))=length(ind)+1;
-                close;
-                figure
-                plot(ce.Time(dex),ce.profile(dex),'k.'); 
-                ylabel('profile number'); grid on; hold on;
-                title(int2str(i));
-                set(gcf,'units','inches','Position',[(1+double(i)/25) 1 10 7]);
-                % looks like diff 5 minutes is a good cut off.
-                % compare to the CTD's labeling of profiles
-                dex=find(i==ctd.ce.deployment);
-                plot(ctd.ce.Time(dex),ctd.ce.profile(dex),'ro');
-                legend({'DOSTA','CTD'});
             else
-                disp(['no data nsite= ',int2str(nsite),' deployment= ',int2str(i)]);
+                disp(['no CTD data nsite= ',int2str(nsite),' deployment= ',int2str(i)]);
             end
         end
         if nsite==1
