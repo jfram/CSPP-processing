@@ -4,8 +4,8 @@ Process data from the NSF OOI Endurance Array Coastal Surface Piercing Profilers
 % download CTD data from OOI's THREDDS catalog -- doner
 % organize by deployment -- done. in the data stream
 % organize by profile -- done (one deployment is missing: CE06ISSP 00006. It is in CI's queue to be fixed)
-% plot by profile -- done well enough
-%   note automated QC issues. Not available as of 2024-08-23. They are in CI's queue. Check back Thanksgiving.
+% plot by profile -- done 
+%   note automated QC issues. Not available as of 2024-12-23. They are in CI's queue. Check back early 2025.
 %   note annotations -- use get_annotations.m from Wingard
 %   make mask for bad data (go through each deployment)
 % download NSIF, MFN, and surface CT data -- done
