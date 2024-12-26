@@ -9,7 +9,7 @@ Process data from the NSF OOI Endurance Array Coastal Surface Piercing Profilers
 %   note annotations -- use get_annotations.m from Wingard
 %   make mask for bad data (go through each deployment)
 % download NSIF, MFN, and surface CT data -- done
-%   get decimated CE02 BEP data from Brandy -- done
+%   decimated CE02 BEP CTD & vel data from Brandy -- done
 % check data against moored CTD data -- 
 %   plot 221: 1: scatter T at the depth for each deployment. -- done 
 %             2: 1:1 T profiler vs. moored (3 dots per profile, so this is per deployment). 
