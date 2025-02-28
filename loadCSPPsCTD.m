@@ -1,13 +1,14 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=0;
+downloadTHREDDS=1;
 addProfile=1;
-inspectQC=0;
+inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
 sites=1:4;
+%% need to reload THREDDs for sites=2 2025-02-27
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -87,6 +88,7 @@ if downloadTHREDDS
             bottom = load_gc_thredds(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
             bottomannotations = get_annotations(mooringSite, bottomNode,bottomSensor);
         end
+
         ce = load_gc_thredds(site, node, sensor, method, stream, tag);
         % tag = 'deployment0017.*CTDPF.*\.nc$';
         
@@ -243,7 +245,7 @@ if inspectQC
             %  all within 2m of surface? Not 2024-08-23. Check back later.
 
             if nsite == 1 || nsite == 3
-                if ~(nsite == 3 && i == 6)
+                if ~(nsite == 3 && i == 6) %% this one bad deployment will be reloaded 
                     subplot(221);
                     scatter(profiler_datetime,depth,10,sea_water_temperature,'filled');
                     ylabel('temperature'); hold on; set(gca,'ydir','rev'); colorbar;
