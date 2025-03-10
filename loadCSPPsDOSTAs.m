@@ -7,7 +7,7 @@ inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=1:4;
+sites=2;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -300,15 +300,15 @@ if inspectQC
             set(gcf,'units','inches','position',[1 1 16 10]);
         end
 
-        if nsite==1
-            save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
-        elseif nsite ==2
-            save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
-        elseif nsite==3
-            save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
-        else
-            save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
-        end
+        % if nsite==1
+        %     save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
+        % elseif nsite ==2
+        %     save('CE02SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
+        % elseif nsite==3
+        %     save('CE06ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
+        % else
+        %     save('CE07SHSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
+        % end
     end
 end
 
