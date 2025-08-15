@@ -1,5 +1,6 @@
 clear; close all; clc;
 tic
+% 412, 443, 490, 510, 555, 619, 684 
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
 downloadTHREDDS=0;
 addProfile=0;
@@ -153,8 +154,8 @@ if inspectQC
         tmp = hour(ce.profiler_datetime);
         ce.day = tmp*0;
         ce.day(tmp <2 | 13 < tmp) = 1; clear tmp;
-        dex=find(ce.spkir_abj_cspp_downwelling_vector<0);
-        ce.spkir_abj_cspp_downwelling_vector(dex)=-ce.spkir_abj_cspp_downwelling_vector(dex);
+        % dex=find(ce.spkir_abj_cspp_downwelling_vector<0);
+        % ce.spkir_abj_cspp_downwelling_vector(dex)=-ce.spkir_abj_cspp_downwelling_vector(dex);
         for i=1:1:max(ce.deployment)
             figure(double(i));
             dex = find(ce.deployment==i & ~ce.day);
@@ -168,23 +169,42 @@ if inspectQC
             spkir_abj_cspp_downwelling_vector = ce.spkir_abj_cspp_downwelling_vector(dex,:);
 
             if ~isempty(dex)
-                subplot(211);
-                scatter(profiler_datetime,depth,12,log10(spkir_abj_cspp_downwelling_vector(:,4)),'filled')
+                subplot(221);
+                scatter(profiler_datetime,depth,12,(spkir_abj_cspp_downwelling_vector(:,4)),'filled')
                 ylabel('day SPKIR'); hold on; set(gca,'ydir','rev'); 
-                a=colorbar; %set(a,'limits',[-1 3.2]);
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                if ~isempty(dex)
-                    scatter(riser.Time(dex),dex*0+7,10,log10(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
-                end
+                a=colorbar; set(a,'limits',[0 1000]);
+                % dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                % if ~isempty(dex)
+                %     scatter(riser.Time(dex),dex*0+7,10,(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
+                % end
 
-                subplot(212);
-                scatter(night_profiler_datetime,night_depth,12,log10(night_spkir_abj_cspp_downwelling_vector(:,4)),'filled')
+                subplot(222);
+                dex=find(spkir_abj_cspp_downwelling_vector(:,4)>0);
+                scatter(profiler_datetime(dex),depth(dex),12,log10(spkir_abj_cspp_downwelling_vector(dex,4)),'filled')
+                ylabel('log 10 day SPKIR no neg'); hold on; set(gca,'ydir','rev'); 
+                a=colorbar; set(a,'limits',[0 3]);
+                % dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                % if ~isempty(dex)
+                %     scatter(riser.Time(dex),dex*0+7,10,(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
+                % end
+
+                subplot(223);
+                scatter(night_profiler_datetime,night_depth,12,(night_spkir_abj_cspp_downwelling_vector(:,4)),'filled')
                 ylabel('night SPKIR'); hold on; set(gca,'ydir','rev'); 
-                a=colorbar; %set(a,'limits',[-1 3.2]);
-                dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
-                if ~isempty(dex)
-                    scatter(riser.Time(dex),dex*0+7,10,log10(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
-                end
+                a=colorbar; set(a,'limits',[0 100]);
+                % dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                % if ~isempty(dex)
+                %     scatter(riser.Time(dex),dex*0+7,10,(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
+                % end
+                subplot(224);
+                dex=find(night_spkir_abj_cspp_downwelling_vector(:,4)>0);
+                scatter(night_profiler_datetime(dex),night_depth(dex),12,log10(night_spkir_abj_cspp_downwelling_vector(dex,4)),'filled')
+                ylabel('log10 night SPKIR no neg'); hold on; set(gca,'ydir','rev'); 
+                a=colorbar; set(a,'limits',[0 2]);
+                % dex=find(min(profiler_datetime)<riser.Time & riser.Time<max(profiler_datetime));
+                % if ~isempty(dex)
+                %     scatter(riser.Time(dex),dex*0+7,10,(riser.spkir_abj_cspp_downwelling_vector(dex,4)));
+                % end
             else
                 disp(['no SPKIR data in site: ',int2str(nsite),' deployment: ',int2str(i)]);
             end

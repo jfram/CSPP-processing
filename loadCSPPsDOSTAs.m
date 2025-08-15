@@ -1,13 +1,13 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=0;
-addProfile=0;
+downloadTHREDDS=1;
+addProfile=1;
 inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=2;
+sites=1;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
@@ -29,7 +29,8 @@ if downloadTHREDDS
             riserNode= 'RID27';
             riserSensor = '04-DOSTAD000';
             riserStream = 'dosta_abcdjm_dcl_instrument_recovered';
-            % CE02SHBP-LJ01D-06-CTDBPN106-streamed-ctdbp_no_sample. TOO DENSE. GET FROM BRANDY.
+            % CE02SHBP-LJ01D-06-CTDBPN106-streamed-ctdbp_no_sample. TOO
+            % DENSE. use CW's load_cabled_ctdbp.m
         elseif nsite == 3    % set up/update required inputs -- CE06ISSP
             site = 'CE06ISSP';
             sensor = '02-DOSTAJ000';
@@ -65,7 +66,7 @@ if downloadTHREDDS
         else
             mooringMethod = 'recovered_host';
         end
-        riser = load_gc_thredds_skip(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
+        riser = load_gc_thredds(mooringSite, riserNode, riserSensor, mooringMethod, riserStream, riserTag);
         riserannotations = get_annotations(mooringSite, riserNode, riserSensor);
         CSPPannotations =  get_annotations(site, node, sensor);
 
@@ -73,18 +74,14 @@ if downloadTHREDDS
             mooringMethod = 'recovered_inst';
         end
         if nsite==2
-            % MAKE A BOTTOM DOSTA FILE
-            % load TSVel_NH10_2014_2024_V2;
-            % bottom=timetable(datetime(time,'ConvertFrom','datenum','TimeZone','UTC')',temp(41,:)',sal(41,:)');
-            % bottom.Properties.VariableNames{1}='sea_water_temperature';
-            % bottom.Properties.VariableNames{2}='sea_water_practical_salinity';
-            bottom = [];
+            load CE02SHBPdosta;
+            bottom = data; clear data;
             bottomannotations = get_annotations('CE02SHBP', 'LJ01D','06-DOSTAD106');
         else
-            bottom = load_gc_thredds_skip(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
+            bottom = load_gc_thredds(mooringSite, bottomNode, bottomSensor, mooringMethod, bottomStream, bottomTag);
             bottomannotations = get_annotations(mooringSite, bottomNode,bottomSensor);
         end
-        ce = load_gc_thredds_skip(site, node, sensor, method, stream, tag);
+        ce = load_gc_thredds(site, node, sensor, method, stream, tag);
 
         if nsite==1
             save('CE01ISSPdosta.mat','-v7.3','ce','riser','bottom','riserannotations','bottomannotations','CSPPannotations');
@@ -180,7 +177,6 @@ disp('  Added profile variable');
 % site 1, deployment 6. CE01ISSM-MFN oxygen biofouling aug sept 2016. 
 % site 1, deployment 4. CE01ISSM-NSIF & MFN biofouling aug sept 2015.
 
-% site 2, deployment 37. DO 10^6. 
 % site 2, deployment 36. Too high. Slightly bad calibration.
 % no data in site 2: deployment: 35
 % site 2, deployment 34. bad calibration

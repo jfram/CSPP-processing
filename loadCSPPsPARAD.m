@@ -1,13 +1,13 @@
 clear; close all; clc;
 tic
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=1;
-addProfile=0;
+downloadTHREDDS=0;
+addProfile=1;
 inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=1;
+sites=1; %1:4
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
