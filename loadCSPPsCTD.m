@@ -7,8 +7,7 @@ inspectQC=1;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=[25,80,29,87];
-sites=2; %1:4;
-%% issues with sites 2 and 4. Deployment 17 and no qc results. October 2024.
+sites=1:4;
 
 %% gather THREDDS CSPP data
 if downloadTHREDDS
