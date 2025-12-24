@@ -3,9 +3,9 @@ tic
 % One last time, load telemetered data
 
 % https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/catalog.html
-downloadTHREDDS=1;
+downloadTHREDDS=0;
 addProfile=1;
-inspectQC=1;
+inspectQC=0;
 folder = 'C:\Users\jfram\OneDrive - Oregon State University\Documents\MATLAB\CSPPproc';
 cd(folder);
 nsitedepths=25;
